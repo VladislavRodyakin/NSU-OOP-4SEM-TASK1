@@ -1,4 +1,5 @@
 #include "Image.hpp"
+#include <exception>
 
 Image::Image()
 {}
@@ -65,6 +66,18 @@ void Image::release()
     }
 }
 
+Image Image::col(int x)
+{
+    unsigned char* column = new unsigned char[m_rows*m_channels];
+    Image result(m_rows,1,m_channels,0);
+    return result;
+}
+
+Image Image::row(int y)
+{
+    return Image();
+}
+
 const unsigned char* Image::data() const
 {
     return m_data;
@@ -123,11 +136,15 @@ void Image::Mirror(MirrorType type)
 {
     if (type == MirrorType::Vertical)
     {
-        
+        //to avoid std::swap (if it even works at all)
+        //create unsigned char[m_rows*m_cols*m_channels] (via new, bc nonconst len doesnt work)
+        //take pieces sizeof m_cols*m_channels for i<m_rows and place at [len - m_rows*m_channels*i]
     }
     else if (type == MirrorType::Horizontal)
     {
-        
+        //create unsigned char[m_rows*m_cols*m_channels] (via new, bc nonconst len doesnt work)
+        //take pieces sizeof m_channels at (i*m_channels)*(j*m_cols) for i<m_cols j<m_rows
+        //and place them at (m_cols*m_channels)*(j*m_cols) - m_cols*m_channels*i
     }
 }
 
@@ -136,8 +153,20 @@ void Image::Rotate(double angle)
     int i_angle = static_cast<int>(angle);
     if (i_angle%90 != 0) 
     {
-        //exception
-        // return?
+            throw std::exception("Invalid turn angle");
     }
-    //(angle/360 * 4) % 4 = number of 90grad rotations
+
+    //(angle/90) % 4 = number of 90grad rotations
+    for (int i = 0; i < ((i_angle / 90) % 4); i++){
+        //rotation cycle, rotating clockwise
+        //take it into separate function void rotate90(&Image orig_img);
+        int tmp_rows = m_cols;
+        int tmp_cols = m_rows;
+        //...
+    }
+}
+
+size_t Image::countRef()
+{
+    return *m_count_refs;
 }
