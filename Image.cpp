@@ -1,6 +1,43 @@
 #include "Image.hpp"
 #include <exception>
 
+unsigned char *Image::take_line(int elem_coount, int pos, int direction)
+{
+    unsigned char* line = new unsigned char[elem_coount*m_channels];
+    if (direction == 1){
+        for (int i = 0; i < elem_coount; i++){
+        //     for (int j = 0; j < m_channels; j++){
+        //         line[i*m_channels+j] = m_data[i*pos*m_channels+j];
+        //     }
+            memcpy(line + i*m_channels, m_data + i*pos*m_channels, m_channels);
+        }
+    }
+
+    //for rotate90 we need to take line backwards
+    if (direction == -1){
+        for (int i = elem_coount; i >=0; i--){
+            memcpy(line + i*m_channels, m_data + i*pos*m_channels, m_channels);
+        }
+    }
+    else{
+        throw std::exception("Invalid direction argument");
+    }
+    return line;
+}
+
+void Image::rotate90()
+{
+    //int tmp_rows = m_cols;
+    //int tmp_cols = m_rows;
+    unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
+    unsigned char* tmp_col_backwards;
+    for (int i = 0; i < m_cols; i++){
+        tmp_col_backwards = take_line(m_rows, i, -1);
+        memcpy(tmp_data + i*m_rows*m_channels, tmp_col_backwards, m_rows*m_channels);
+    }
+    *this = Image(m_cols, m_rows, m_channels, tmp_data);
+}
+
 Image::Image()
 {}
 
@@ -12,7 +49,8 @@ Image::Image(int rows, int cols, int channels, unsigned char *data): Image(rows,
     m_data=data;
 }
 
-Image::Image(const Image &image): m_rows{image.m_rows}, m_cols{image.m_cols}, m_channels{image.m_channels}, m_data{image.m_data}
+Image::Image(const Image &image): m_rows{image.m_rows}, m_cols{image.m_cols},
+                             m_channels{image.m_channels}, m_data{image.m_data}
 {
     *m_count_refs++;
 }
@@ -27,10 +65,15 @@ Image& Image::operator=(const Image &image)
     if (this == &image){
         return *this;
     }
+    this->create(image.m_rows, image.m_cols, image.m_channels);
+    /*
+    this->release();
     m_rows = image.m_rows;
     m_cols = image.m_cols;
     m_channels = image.m_channels;
+    */
     m_data = image.m_data;
+    m_count_refs = image.m_count_refs;
     *m_count_refs++;
     return *this;
 }
@@ -42,7 +85,7 @@ Image Image::clone()
 
 void Image::copyTo(Image &image)
 {
-    image=this->clone(); // is it?
+    image=this->clone(); // is it? (it is)
 }
 
 void Image::create(int rows, int cols, int channels)
@@ -60,7 +103,7 @@ bool Image::empty()
 
 void Image::release()
 {
-    m_count_refs--;
+    *m_count_refs--;
     if (*m_count_refs<=0){
         delete m_data;
     }
@@ -68,14 +111,16 @@ void Image::release()
 
 Image Image::col(int x)
 {
-    unsigned char* column = new unsigned char[m_rows*m_channels];
-    Image result(m_rows,1,m_channels,0);
+    unsigned char* line = take_line(m_rows, x);
+    Image result(m_rows, 1, m_channels, line);
     return result;
 }
 
 Image Image::row(int y)
 {
-    return Image();
+    unsigned char* line = take_line(m_cols, y);
+    Image result(1, m_cols, m_channels, line);
+    return result;
 }
 
 const unsigned char* Image::data() const
@@ -159,10 +204,7 @@ void Image::Rotate(double angle)
     //(angle/90) % 4 = number of 90grad rotations
     for (int i = 0; i < ((i_angle / 90) % 4); i++){
         //rotation cycle, rotating clockwise
-        //take it into separate function void rotate90(&Image orig_img);
-        int tmp_rows = m_cols;
-        int tmp_cols = m_rows;
-        //...
+        this->rotate90();
     }
 }
 

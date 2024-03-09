@@ -6,9 +6,11 @@ enum class MirrorType {
 };
 
 class Image {
-    size_t* m_count_refs;
+    size_t* m_count_refs; 
     int m_rows, m_cols, m_channels;
     unsigned char* m_data;
+    unsigned char* take_line(int which, int pos, int direction = 1);
+    void rotate90();
 public:
     Image();
     Image(int rows, int cols, int channels);
@@ -52,7 +54,7 @@ public:
     void Mirror(MirrorType type);
 
     //Повернуть на угол кратный 90
-    void Rotate(double angle); ///not div 90 => exception
+    void Rotate(double angle); //not div 90 => exception
 
     //Возвращает текущее количество ссылок на изображение.
     //Т.е. количество объектов, которые ссылаются на данное изображение. Этот метод нужен для unit test'ов.
