@@ -13,7 +13,7 @@ unsigned char *Image::take_line(int elem_coount, int pos, int direction)
         }
     }
 
-    //for rotate90 we need to take line backwards
+    //for rotate90 and vertical mirror we need to take line backwards
     if (direction == -1){
         for (int i = elem_coount; i >=0; i--){
             memcpy(line + i*m_channels, m_data + i*pos*m_channels, m_channels);
@@ -179,18 +179,27 @@ Image Image::values(int rows, int cols, int channels, unsigned char value)
 
 void Image::Mirror(MirrorType type)
 {
+    unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
     if (type == MirrorType::Vertical)
     {
-        //to avoid std::swap (if it even works at all)
-        //create unsigned char[m_rows*m_cols*m_channels] (via new, bc nonconst len doesnt work)
         //take pieces sizeof m_cols*m_channels for i<m_rows and place at [len - m_rows*m_channels*i]
+        unsigned char* tmp_row;
+        for(int i = 0; i < m_rows; i++){
+            tmp_row = take_line(m_cols, i);
+            memcpy(tmp_data + (m_rows - i)*m_cols*m_channels, tmp_row, m_cols*m_channels);
+        }
     }
     else if (type == MirrorType::Horizontal)
     {
-        //create unsigned char[m_rows*m_cols*m_channels] (via new, bc nonconst len doesnt work)
         //take pieces sizeof m_channels at (i*m_channels)*(j*m_cols) for i<m_cols j<m_rows
         //and place them at (m_cols*m_channels)*(j*m_cols) - m_cols*m_channels*i
+        unsigned char* tmp_row;
+        for(int i = 0; i < m_rows; i++){
+            tmp_row = take_line(m_cols, i, -1);
+            memcpy(tmp_data + i*m_cols*m_channels, tmp_row, m_cols*m_channels);
+        }
     }
+    *this = Image(m_rows, m_cols, m_channels, tmp_data);
 }
 
 void Image::Rotate(double angle)
