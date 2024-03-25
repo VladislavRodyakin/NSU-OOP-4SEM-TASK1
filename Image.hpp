@@ -1,4 +1,4 @@
-#include <vector>
+#include <iostream>
 
 enum class MirrorType {
   Vertical,
@@ -9,8 +9,8 @@ class Image {
     size_t* m_count_refs; 
     int m_rows, m_cols, m_channels;
     unsigned char* m_data;
-    unsigned char* take_line(int which, int pos, int direction = 1);
-    void rotate90();
+    unsigned char* take_line(int elem_count, int pos, int direction = 1) const;
+    void rotate90(int direction = 1);
 public:
     Image();
     Image(int rows, int cols, int channels);
@@ -25,22 +25,22 @@ public:
     //Скопировать изображение.
     void copyTo(Image& image); // efficently clone, but into existing obj
     void create(int rows, int cols, int channels);
-    bool empty();
+    bool empty() const;
 
     //декрементирует счетчик ссылок и в случае необходимости освобождает ресурсы (память).
     void release();
 
-    Image col(int x);
+    Image col(int x) const;
 
-    Image row(int y);
+    Image row(int y) const;
 
     const unsigned char* data() const;
     unsigned char* data();
 
-    int rows();
-    int cols();
-    int total();
-    int channels();
+    int rows() const;
+    int cols() const;
+    int total() const;
+    int channels() const;
 
     //Вернуть ЧАСТЬ пикселя
     unsigned char& at(int index);
