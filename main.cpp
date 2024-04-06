@@ -1,35 +1,90 @@
 #include <iostream>
+#include <cstring>
 #include "Image.hpp"
 
 int main() {
-    std::cout << "helo" << std::endl;
     const Image c_img;
     const unsigned char* c_tmp = c_img.data();
+
     unsigned char* upload_1 = new unsigned char[100]; 
-    memcpy(upload_1, "123123321321231231", strlen("123123321321231231"));
-    unsigned char upload_2[]{"321231231123123321"};
-    Image img{3, 2, 3, upload_1};
-    //std::cout<<img.col(0).data()<<std::endl; //doesn't work (no output)
-    std::cout<<img.data()<<std::endl;
-    if(img.rows()!= 3){
-        std::cout<<"fail"<<std::endl;
+    std::memcpy(upload_1, "123123321321231231", std::strlen("123123321321231231"));
+
+    unsigned char* upload_2 = new unsigned char[18];
+    std::memcpy(upload_2, (unsigned char*)("123123321321231231"), 18);
+
+    unsigned char* upload_3 = new unsigned char[6];
+    std::memcpy(upload_3, "123456", 6);
+
+    int size = std::strlen("123123321321231231");
+    unsigned char* upload_4 = new unsigned char[size];
+    std::memcpy(upload_4, "123123321321231231", size);
+
+    unsigned char* upload_5 = new unsigned char[18];
+    for (unsigned char i = 0; i<18; i++) {
+        upload_5[i] = i;
+        
     }
-    std::cout<<img.rows()<<std::endl;
-    std::cout<<img.cols()<<std::endl;
-    std::cout<<img.total()<<std::endl; //works on 3,2, but doesn't on 2,3
-    //added & deleted breakpoint, it works now - WHY???? HOW?????
-    //if 2,3 changes to 3,2 and back, then total doesn't compute on 2,3 again. the hell is it's problem
-    //sometimes it works, sometimes it doesn't
-    //it's not consistent, i don't know what is happening
-    //removed memcpy, everything stabilized... still no clue why this was happening 
-    img.Rotate(90); //seems to not work...
-    std::cout<<"rotated successfully"<<std::endl;
-    std::cout<<img.data()<<std::endl;
-    if(img.rows()!= 3){
-        std::cout<<"fail"<<std::endl;
+    //Image img{3, 2, 3, upload_1};
+    //Image img{3, 2, 3, upload_2};
+    //Image img{3, 2, 1, upload_3};
+    Image img{3, 2, 3, upload_4};
+    //Image img{3, 2, 3, upload_5};
+
+
+    std::cout<<img.data()<<"opp"<<std::endl;  
+    std::cout<<img.col(0).data()<<std::endl;  
+    std::cout<<img.col(1).data()<<std::endl;  
+    std::cout<<img.row(0).data()<<std::endl; 
+    std::cout<<img.row(1).data()<<std::endl; 
+    std::cout<<img.row(2).data()<<std::endl; 
+    img.Rotate(270); 
+
+    unsigned char* rotate_1 = new unsigned char[std::strlen("231321123231321123")];
+    std::memcpy(rotate_1, "231321123231321123", std::strlen("231321123231321123"));
+    std::cout<<std::memcmp(rotate_1, img.data(), std::strlen("231321123231321123"))<<std::endl;
+    std::cout<<rotate_1<<std::endl;
+    
+    std::cout<<img.data()<<std::endl;  
+    std::cout<<"cols:"<<std::endl;
+    for (int i = 0; i < img.cols(); i++) {
+        std::cout<<img.col(i).data()<<std::endl;
     }
-    std::cout<<img.rows()<<std::endl;
-    std::cout<<img.cols()<<std::endl;
-    std::cout<<img.total()<<std::endl;
+    std::cout<<"rows:"<<std::endl;
+    for (int i = 0; i < img.rows(); i++) {
+        std::cout<<img.row(i).data()<<std::endl;
+    }  
+    
+    Image img2 = img.clone();
+    std::cout<<img2.data()<<std::endl;
+    img2.Rotate(90);
+    std::cout<<img.data()<<std::endl;
+    std::cout<<img2.data()<<std::endl;
+
+    img.release();
+    img2.release();
+
+    Image img_1c{3, 2, 1, upload_3};
+
+    std::cout<<img_1c.data()<<std::endl;
+    img_1c.Mirror(MirrorType::Horizontal);
+    std::cout<<img_1c.data()<<std::endl;
+
     return 0;
 }
+
+// i begin to think that it should be done with 2d array of m_channels length 1d arrays
+// using special methods to transform it into 1d array and the other way around
+// because the hell is the problem with typing 123123 and getting it stored as 123456?
+// literally the output of
+
+//unsigned char* upload_2 = new unsigned char[18];
+//memcpy(upload_2, (unsigned char*)("123123321321231231"), 18);
+//Image img{3, 2, 3, upload_2};
+//std::cout<<img.data()<<std::endl;
+
+// is
+
+//123456321321231231¤¤¤¤r
+
+// it is beyond me how this happens
+// tested with upload_4, problem seems to be in cast

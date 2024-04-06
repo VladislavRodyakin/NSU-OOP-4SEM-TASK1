@@ -4,26 +4,31 @@
 
 unsigned char *Image::take_line(int elem_count, int pos, int direction) const
 {
-    std::cout<<"takeline pre succesfull, dir: "<<direction<<" elem: "<<elem_count<<std::endl;
-
     unsigned char* line = new unsigned char[elem_count*m_channels];
     if (direction == 1){
         for (int i = 0; i < elem_count; i++){
-        //     for (int j = 0; j < m_channels; j++){
-        //         line[i*m_channels+j] = m_data[i*pos*m_channels+j];
-        //     }
-            //std::cout<<"takeline pre - memcpy succesfull"<<std::endl;
-            memcpy(line + i*m_channels, m_data + i*pos*m_channels, m_channels);
-            std::cout<<"takeline memcpy succesfull"<<std::endl;
+            //extracting coloumn
+            if (elem_count == m_rows){ 
+                memcpy(line + i*m_channels, m_data + (pos + i*m_cols)*m_channels, m_channels);
+            }
+            //extracting row
+            if (elem_count == m_cols){
+                memcpy(line + i*m_channels, m_data + (pos*m_cols + i)*m_channels, m_channels);
+            }
         }
     }
-
     //for rotate90 and vertical mirror we need to take line backwards
-    if (direction == -1){
-        for (int i = elem_count; i > 0; i--){
-            //std::cout<<"takeline pre - memcpy succesfull"<<std::endl;
-            memcpy(line + i*m_channels, m_data + i*pos*m_channels, m_channels);
-            std::cout<<"takeline memcpy succesfull"<<std::endl;
+    else if (direction == -1){
+        for (int i = elem_count - 1; i >= 0; i--){
+            //memcpy(line + i*m_channels, m_data + i*pos*m_channels*elem_count, m_channels);
+            //extracting coloumn
+            if (elem_count == m_rows){ 
+                memcpy(line + (elem_count - i - 1)*m_channels, m_data + (pos + i*m_cols)*m_channels, m_channels);
+            }
+            //extracting row
+            if (elem_count == m_cols){
+                memcpy(line + (elem_count - i - 1)*m_channels, m_data + (pos*m_cols + i)*m_channels, m_channels);
+            }
         }
     }
     else{
@@ -34,19 +39,17 @@ unsigned char *Image::take_line(int elem_count, int pos, int direction) const
 
 void Image::rotate90(int direction) // 1 clockwise, -1 counterclockwise
 {
-    //int tmp_rows = m_cols;
+    int tmp_rows = m_cols;
     //int tmp_cols = m_rows;
     unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
     unsigned char* tmp_col_backwards;
     for (int i = 0; i < m_cols; i++){
         tmp_col_backwards = take_line(m_rows, i, -direction);
         memcpy(tmp_data + i*m_rows*m_channels, tmp_col_backwards, m_rows*m_channels);
-        std::cout<<"rotate cycle succesfull"<<std::endl;
     }
-    std::cout<<(*tmp_data)<<std::endl;
     //*this = Image(m_cols, m_rows, m_channels, tmp_data);
     m_cols = m_rows;
-    m_rows = m_cols;
+    m_rows = tmp_rows;
     delete m_data;
     m_data = tmp_data;
 }
@@ -123,14 +126,12 @@ bool Image::empty() const
 void Image::release()
 {
     if (m_count_refs == nullptr){
-        //throw std::exception("Releasing empty image");
-        //this is better to just return bc polymorphysm
-        return;
+        return; //this is better to just return bc polymorphysm
     }
     (*m_count_refs)--;
     if ((*m_count_refs)<=0){
         delete m_count_refs;
-        //delete[] m_data; //simple obj -> no delete[]
+        delete m_data; //simple obj -> no delete[]
     }
 }
 
@@ -203,7 +204,7 @@ const unsigned char& Image::at(int index) const
 Image Image::zeros(int rows, int cols, int channels)
 {
     Image result(rows, cols, channels);
-    memset(&(result.m_data), 0, rows*cols*channels);
+    memset((result.m_data), 0, rows*cols*channels);
     return result;
 }
 
@@ -224,7 +225,7 @@ void Image::Mirror(MirrorType type)
         //take pieces sizeof m_cols*m_channels for i<m_rows and place at [len - m_rows*m_channels*i]
         for(int i = 0; i < m_rows; i++){
             tmp_row = take_line(m_cols, i);
-            memcpy(tmp_data + (m_rows - i)*m_cols*m_channels, tmp_row, m_cols*m_channels);
+            memcpy(tmp_data + (m_rows - i - 1)*m_cols*m_channels, tmp_row, m_cols*m_channels);
         }
         break;
     case MirrorType::Horizontal:
@@ -238,13 +239,13 @@ void Image::Mirror(MirrorType type)
     default:
         break;
     }
-    *this = Image(m_rows, m_cols, m_channels, tmp_data);
+    //*this = Image(m_rows, m_cols, m_channels, tmp_data);
+    m_data = tmp_data;
 }
 
 void Image::Rotate(double angle)
 {
     int i_angle = static_cast<int>(angle);
-    //std::cout<<"angle got1"<<std::endl;
 
     if (i_angle%90 != 0) 
     {
@@ -255,23 +256,24 @@ void Image::Rotate(double angle)
     unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
     unsigned char* tmp_row;
     int num_rot = (i_angle/90)%4;
-    std::cout<<"angle got: "<< num_rot<<std::endl;
+    
     switch (num_rot)
     {
     case 1:
-        std::cout<<"case 1"<<std::endl;
         this->rotate90();
         break;
     case 2:
-        std::cout<<"case 2"<<std::endl;
+        /*
         for(int i = 0; i < m_rows; i++){
             tmp_row = take_line(m_cols, i, -1);
             memcpy(tmp_data + (m_rows - i)*m_cols*m_channels, tmp_row, m_cols*m_channels);
         }
         *this = Image(m_rows, m_cols, m_channels, tmp_data);
+        */
+        this->rotate90();
+        this->rotate90();
         break;
     case 3:
-        std::cout<<"case 3"<<std::endl;
         this->rotate90(-1);
         break;
     default:
@@ -283,7 +285,6 @@ size_t Image::countRef()
 {
     if (m_count_refs == nullptr){
         return 0;
-        //we can throw but why? nullptr means we're not referencing anything even once
     }
     return *m_count_refs;
 }
