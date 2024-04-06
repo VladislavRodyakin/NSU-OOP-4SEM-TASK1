@@ -1,11 +1,12 @@
 #include <iostream>
 #include "Image.hpp"
 
-int main(){
-    std::cout<<"helo"<<std::endl;
+int main() {
+    std::cout << "helo" << std::endl;
     const Image c_img;
     const unsigned char* c_tmp = c_img.data();
-    unsigned char upload_1[]{"123123321321231231"};
+    unsigned char* upload_1 = new unsigned char[100]; 
+    memcpy(upload_1, "123123321321231231", strlen("123123321321231231"));
     unsigned char upload_2[]{"321231231123123321"};
     Image img{3, 2, 3, upload_1};
     //std::cout<<img.col(0).data()<<std::endl; //doesn't work (no output)

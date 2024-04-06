@@ -44,7 +44,11 @@ void Image::rotate90(int direction) // 1 clockwise, -1 counterclockwise
         std::cout<<"rotate cycle succesfull"<<std::endl;
     }
     std::cout<<(*tmp_data)<<std::endl;
-    *this = Image(m_cols, m_rows, m_channels, tmp_data);
+    //*this = Image(m_cols, m_rows, m_channels, tmp_data);
+    m_cols = m_rows;
+    m_rows = m_cols;
+    delete m_data;
+    m_data = tmp_data;
 }
 
 Image::Image()
@@ -126,7 +130,7 @@ void Image::release()
     (*m_count_refs)--;
     if ((*m_count_refs)<=0){
         delete m_count_refs;
-        delete m_data; //simple obj -> no delete[]
+        //delete[] m_data; //simple obj -> no delete[]
     }
 }
 
