@@ -26,6 +26,11 @@ gtest_discover_tests(test)
 
 add_executable(task1 main.cpp Image.cpp Image.hpp)
 
+
+enable_testing() 
+add_subdirectory(./tests)
+
+
 #[[
 # Версия cmake
 #cmake_minimum_required (VERSION 3.2)
