@@ -69,6 +69,14 @@ int main() {
     img_1c.Mirror(MirrorType::Horizontal);
     std::cout<<img_1c.data()<<std::endl;
 
+    //seems to work
+    img.release();
+    img_1c.release();
+    img2.release();
+    
+
+    //need to find out why debug build doesn't work
+
     return 0;
 }
 
