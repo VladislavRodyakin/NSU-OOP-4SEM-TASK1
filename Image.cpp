@@ -286,5 +286,5 @@ size_t Image::countRef()
     if (m_count_refs == nullptr){
         return 0;
     }
-    return *m_count_refs;
+    return (*m_count_refs);
 }

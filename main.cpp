@@ -69,11 +69,20 @@ int main() {
     img_1c.Mirror(MirrorType::Horizontal);
     std::cout<<img_1c.data()<<std::endl;
 
+    std::cout<<img.countRef()<<std::endl;
+    std::cout<<img2.countRef()<<std::endl;
+    std::cout<<img_1c.countRef()<<std::endl;
+
+    Image img_cl = img.clone();
+    std::cout<<img.countRef()<<std::endl;
+    
     //seems to work
     img.release();
     img_1c.release();
     img2.release();
     
+    //because tests still won't work, minimal testing is done here
+    //but cmake did smth with gtests on laptop, so it i will look into it
 
     //need to find out why debug build doesn't work
 
