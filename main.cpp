@@ -69,6 +69,8 @@ int main() {
     img_1c.Mirror(MirrorType::Horizontal);
     std::cout<<img_1c.data()<<std::endl;
 
+    //count refs acts strange
+    //suspect initialisation
     std::cout<<img.countRef()<<std::endl;
     std::cout<<img2.countRef()<<std::endl;
     std::cout<<img_1c.countRef()<<std::endl;
