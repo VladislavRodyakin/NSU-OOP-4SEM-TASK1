@@ -50,7 +50,7 @@ void Image::rotate90(int direction) // 1 clockwise, -1 counterclockwise
     //*this = Image(m_cols, m_rows, m_channels, tmp_data);
     m_cols = m_rows;
     m_rows = tmp_rows;
-    delete m_data;
+    //delete m_data;
     m_data = tmp_data;
 }
 
@@ -77,6 +77,13 @@ Image::Image(const Image &image): m_rows{image.m_rows}, m_cols{image.m_cols},
 
 Image::~Image()
 {
+    std::cout<<" destructor Image "<<std::endl;
+    /*
+    if(m_count_refs != nullptr) {std::cout<<"r"; delete m_count_refs;};
+    std::cout<<" deleted refs"<<std::endl;
+    if(m_data != nullptr) {std::cout<<"r"; delete m_data;};
+    std::cout<<" deleted data"<<std::endl;
+    */
     this->release();
 }
 
@@ -87,11 +94,11 @@ Image& Image::operator=(const Image &image)
     }
     this->create(image.m_rows, image.m_cols, image.m_channels);
     /*
-    this->release();
     m_rows = image.m_rows;
     m_cols = image.m_cols;
     m_channels = image.m_channels;
     */
+    //this->release();
     m_data = image.m_data;
     m_count_refs = image.m_count_refs;
     if (m_count_refs != nullptr){
@@ -102,6 +109,7 @@ Image& Image::operator=(const Image &image)
 
 Image Image::clone()
 {
+    //(*(this->m_count_refs))++;
     return Image(*this);
 }
 
@@ -125,13 +133,24 @@ bool Image::empty() const
 
 void Image::release()
 {
+    std::cout<<" m_refs null "<<(m_count_refs==nullptr)<<std::endl;
+    //std::cout<<"aboba"<<std::endl;
     if (m_count_refs == nullptr){
         return; //this is better to just return bc polymorphysm
     }
+    std::cout<<" refs "<<m_count_refs<<std::endl;
+    std::cout<<" refs= "<<*m_count_refs<<std::endl;
+    std::cout<<" data "<<m_data<<" "<< &m_data<<std::endl;
+    
     (*m_count_refs)--;
     if ((*m_count_refs)<=0){
+        std::cout<<" deleting refs "<<m_count_refs<<std::endl;
         delete m_count_refs;
+        std::cout<<" deleting data "<<m_data<<" "<< &m_data<<std::endl;
         delete m_data; //simple obj -> no delete[]
+        m_count_refs = nullptr;
+        m_data = nullptr;
+        std::cout<<(m_count_refs == nullptr)<<" "<<(m_data==nullptr) <<std::endl;
     }
 }
 
@@ -240,11 +259,13 @@ void Image::Mirror(MirrorType type)
         break;
     }
     //*this = Image(m_rows, m_cols, m_channels, tmp_data);
+    m_count_refs = new size_t{1};
     m_data = tmp_data;
 }
 
 void Image::Rotate(double angle)
 {
+    this->release();
     int i_angle = static_cast<int>(angle);
 
     if (i_angle%90 != 0) 
@@ -279,6 +300,9 @@ void Image::Rotate(double angle)
     default:
         break;
     }
+    
+    m_count_refs = new size_t{1};
+    
 }
 
 size_t Image::countRef()
