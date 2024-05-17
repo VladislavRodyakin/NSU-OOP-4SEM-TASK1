@@ -80,6 +80,7 @@ int main() {
     std::cout<<"8 "<<img_1c.countRef()<<std::endl;
 
     Image img_cl = img.clone();
+    std::cout<<"end"<<std::endl;/*
     std::cout<<"9 "<<img.countRef()<<std::endl;
     
     //seems to work
@@ -90,6 +91,7 @@ int main() {
     img_1c.release();
     std::cout<<"12 "<<"img2 del"<<std::endl;
     img2.release();
+*/
     
     //desructors are mass called by the end of the main and something breaks here
 
@@ -103,7 +105,6 @@ int main() {
     //bc release func was scuffed
     return 0;
 }
-
 
 
 

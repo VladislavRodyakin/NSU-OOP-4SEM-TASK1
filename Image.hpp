@@ -6,9 +6,9 @@ enum class MirrorType {
 };
 
 class Image {
-    size_t* m_count_refs; 
-    int m_rows, m_cols, m_channels;
-    unsigned char* m_data;
+    size_t* m_count_refs = nullptr; 
+    int m_rows, m_cols, m_channels = 0;
+    unsigned char* m_data = nullptr;
     unsigned char* take_line(int elem_count, int pos, int direction = 1) const;
     void rotate90(int direction = 1);
 public:
@@ -21,9 +21,9 @@ public:
     Image& operator=(const Image& image);
 
     // Вернуть клон изборажения
-    Image clone();
+    Image clone() const;
     //Скопировать изображение.
-    void copyTo(Image& image); // efficently clone, but into existing obj
+    void copyTo(Image& image) const; // efficently clone, but into existing obj
     void create(int rows, int cols, int channels);
     bool empty() const;
 
@@ -58,5 +58,5 @@ public:
 
     //Возвращает текущее количество ссылок на изображение.
     //Т.е. количество объектов, которые ссылаются на данное изображение. Этот метод нужен для unit test'ов.
-    size_t countRef();
+    size_t countRef() const;
 };
