@@ -103,7 +103,9 @@ Image& Image::operator=(const Image &image)
 Image Image::clone() const
 {
     std::cout<<"clone 1 ";unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
-    std::cout<<"clone 2 ";memcpy(tmp_data, m_data, m_cols*m_rows*m_channels); // something breaks in memcpy
+    if (m_data != nullptr) {
+        std::cout<<"clone 2 ";memcpy(tmp_data, m_data, m_cols*m_rows*m_channels);
+    }
     std::cout<<"clone ret "<<std::endl;return Image(m_rows, m_cols, m_channels, tmp_data);
 }
 
