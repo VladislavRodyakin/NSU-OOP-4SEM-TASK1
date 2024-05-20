@@ -58,10 +58,9 @@ int main() {
     */
     Image img2 = img.clone();
     std::cout<<"1 "<<img2.data()<<std::endl;
-    std::cout<<"2 "<<img.data()<<std::endl; // this works 
+    std::cout<<"2 "<<img.data()<<std::endl;  
     img2.Rotate(90);
-    std::cout<<"2 "<<img.data()<<std::endl; // and then this doesn't
-                                            // fixed by commenting out delete m_data in rotation
+    std::cout<<"2 "<<img.data()<<std::endl; 
     std::cout<<"3 "<<img2.data()<<std::endl;
 
     img.release();
@@ -73,8 +72,6 @@ int main() {
     img_1c.Mirror(MirrorType::Horizontal);
     std::cout<<"5 "<<img_1c.data()<<std::endl;
 
-    //count refs acts strange
-    //suspect initialisation
     std::cout<<"6 "<<img.countRef()<<std::endl;
     std::cout<<"7 "<<img2.countRef()<<std::endl;
     std::cout<<"8 "<<img_1c.countRef()<<std::endl;
@@ -82,7 +79,6 @@ int main() {
     Image img_cl = img.clone();
     std::cout<<"9 "<<img.countRef()<<std::endl;
     
-    //seems to work
     
     std::cout<<"10 "<<"img del"<<std::endl;
     img.release();
@@ -94,15 +90,8 @@ int main() {
 */
     
     //desructors are mass called by the end of the main and something breaks here
+    //fixed
 
-
-    //because tests still won't work, minimal testing is done here
-    //but cmake did smth with gtests on laptop, so it i will look into it
-    //tests work now, everything should be moved here
-
-
-    //need to find out why debug build doesn't work
-    //bc release func was scuffed
     return 0;
 }
 

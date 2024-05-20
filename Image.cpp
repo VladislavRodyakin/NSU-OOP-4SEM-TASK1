@@ -40,17 +40,14 @@ unsigned char *Image::take_line(int elem_count, int pos, int direction) const
 void Image::rotate90(int direction) // 1 clockwise, -1 counterclockwise
 {
     int tmp_rows = m_cols;
-    //int tmp_cols = m_rows;
     unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
     unsigned char* tmp_col_backwards;
     for (int i = 0; i < m_cols; i++){
         tmp_col_backwards = take_line(m_rows, i, -direction);
         memcpy(tmp_data + i*m_rows*m_channels, tmp_col_backwards, m_rows*m_channels);
     }
-    //*this = Image(m_cols, m_rows, m_channels, tmp_data);
     m_cols = m_rows;
     m_rows = tmp_rows;
-    //delete m_data;
     m_data = tmp_data;
 }
 
@@ -79,7 +76,6 @@ Image::Image(const Image &image): m_rows{image.m_rows}, m_cols{image.m_cols},
 
 Image::~Image()
 {
-    std::cout<<" destructor Image "<<std::endl;
     this->release();
 }
 
@@ -102,11 +98,11 @@ Image& Image::operator=(const Image &image)
 
 Image Image::clone() const
 {
-    std::cout<<"clone 1 ";unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
+    unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
     if (m_data != nullptr) {
-        std::cout<<"clone 2 ";memcpy(tmp_data, m_data, m_cols*m_rows*m_channels);
+        memcpy(tmp_data, m_data, m_cols*m_rows*m_channels);
     }
-    std::cout<<"clone ret "<<std::endl;return Image(m_rows, m_cols, m_channels, tmp_data);
+    return Image(m_rows, m_cols, m_channels, tmp_data);
 }
 
 void Image::copyTo(Image &image) const
@@ -135,23 +131,16 @@ bool Image::empty() const
 
 void Image::release()
 {
-    std::cout<<" m_refs null "<<(m_count_refs==nullptr)<<std::endl;
     if (m_count_refs == nullptr){
         return; //this is better to just return bc polymorphysm
     }
-    std::cout<<" refs "<<m_count_refs<<std::endl;
-    std::cout<<" refs= "<<*m_count_refs<<std::endl;
-    std::cout<<" data "<<m_data<<" "<< &m_data<<std::endl;
     
     (*m_count_refs)--;
     if ((*m_count_refs)<=0){
-        std::cout<<" deleting refs "<<m_count_refs<<std::endl;
         delete m_count_refs;
-        std::cout<<" deleting data "<<m_data<<" "<< &m_data<<std::endl;
         delete m_data; //simple obj -> no delete[]
         m_count_refs = nullptr;
         m_data = nullptr;
-        std::cout<<(m_count_refs == nullptr)<<" "<<(m_data==nullptr) <<std::endl;
     }
 }
 
@@ -259,19 +248,16 @@ void Image::Mirror(MirrorType type)
     default:
         break;
     }
-    //*this = Image(m_rows, m_cols, m_channels, tmp_data);
     m_count_refs = new size_t{1};
     m_data = tmp_data;
 }
 
 void Image::Rotate(double angle)
 {
-    std::cout<<" entering rotate "<<std::endl;
     unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
     std::memcpy(tmp_data, m_data, m_cols*m_rows*m_channels);
     this->release();
     m_data = tmp_data;
-    std::cout<<" released "<<std::endl;
     int i_angle = static_cast<int>(angle);
 
     if (i_angle%90 != 0) 
@@ -279,8 +265,6 @@ void Image::Rotate(double angle)
             throw std::invalid_argument("Invalid turn angle");
     }
 
-    //unsigned char* tmp_data = new unsigned char[m_cols*m_rows*m_channels];
-    //unsigned char* tmp_row;
     
     //(angle/90) % 4 = number of 90grad rotations
     int num_rot = (i_angle/90)%4;
@@ -297,6 +281,7 @@ void Image::Rotate(double angle)
         }
         *this = Image(m_rows, m_cols, m_channels, tmp_data);
         */
+        // redo combining Mirroring algorithms
         this->rotate90();
         this->rotate90();
         break;
@@ -308,7 +293,6 @@ void Image::Rotate(double angle)
     }
     
     m_count_refs = new size_t{1};
-    std::cout<<" leaving rotate "<<std::endl;
     
 }
 
